@@ -22,14 +22,12 @@
 	function initAddCss() {
 		(window.AddCss = function() {
 
-			var $txt;
-
 			if (document.getElementById("txtAddCss")) {
 				$("#txtAddCss").toggle();
 				return false;
 			}
 
-			var hasLocalStorage = (function(){
+			var bHasLocal = (function(){
 				try {
 					return 'localStorage' in window && window['localStorage'] !== null;
 				} catch (e) {
@@ -37,17 +35,16 @@
 				};
 			})();
 
-			var container = $("<div />").css({
+			var $container = $("<div />").css({
 				position: "fixed",
 				bottom: "10px",
 				right: "10px",
-				background: "#333",
 				"z-index": "1000"
 			}).appendTo($("body"));
 
 			var $style = $("<style />").appendTo($("body"));
 
-			$txt = $("<textarea id='txtAddCss' spellcheck='false' />").css({
+			var $txt = $("<textarea id='txtAddCss' spellcheck='false' />").css({
 				resize: "both",
 				display: "block",
 				background: "#111",
@@ -58,24 +55,20 @@
 				font: "13px/18px \"Courier New\", Courier, \"Lucida Sans Typewriter\", \"Lucida Typewriter\", monospace",
 				padding: "10px",
 				overflow: "auto"
-			}).bind("keyup change", updateCss).appendTo(container);
-
-			function updateCss() {
+			}).bind("keyup change", function(){
 				var sCss = $txt.val();
 				$style.html(sCss);
-				if (hasLocalStorage) { localStorage["css"] = sCss; }
-			}
-
-			$txt.focus();
-
-			if (hasLocalStorage) {
-				if ((localStorage["css"] !== null) && (localStorage["css"] !== undefined)) {
-					$txt.val(localStorage["css"]).change();
+				if (bHasLocal) { localStorage.addCss = sCss; }
+			}).bind("keydown", function(e){
+				if (e.which === 27) {
+					$txt.toggle();
 				}
-			}
+			}).appendTo($container).focus();
 
-			if ($txt.val().trim() === "") {
-				$txt.val("/* Edit me! */\n\nbody {\n\tbackground: #F5F5F5;\n\tcolor: #333;\n}").change();
+			if (bHasLocal) {
+				if (localStorage.addCss) {
+					$txt.val(localStorage.addCss).change();
+				}
 			}
 
 		})();

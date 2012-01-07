@@ -2,7 +2,7 @@
 
 body {
 	font-family: 'Open Sans', Sans-Serif;
-	line-height: 20px;
+	line-height: 22px;
 	font-size: 16px;
 	background: #F5F5F5;
 	color: #333;
@@ -19,11 +19,11 @@ h1,h2 {
 h1 { font-size: 80px; line-height: 60px; }
 h1 a { text-decoration: none; }
 
-h2,p { margin: 0 0 15px 0;  }
+h2,p { margin: 0 0 22px 0;  }
 
 a { color: #111; }
 
-p, small { margin: 0 0 20px; }
+p, small { margin: 0 0 22px; }
 
 h1 { margin-left: -4px; }
 small { margin: 5px 0 20px 2px; }
