@@ -1,0 +1,2 @@
+// http://coding.smashingmagazine.com/2010/05/23/make-your-own-bookmarklets-with-jquery/
+window.location = document.getElementById("aAddCss").href = "javascript:(function(){if(window.addCss!==undefined){window.addCss();}else{document.body.appendChild(document.createElement('script')).src='" + document.location.protocol + "//" + document.location.host + document.location.pathname + "addcss.js';}})();";
