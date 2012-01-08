@@ -18,6 +18,7 @@ $(function(){
 	$("#txtCopy").html(sBookmarklet);
 	var $dIpad = $("#dIpad")
 	$("#aIpad").click(function(){
+		document.title = "addCSS";
 		$dIpad.toggle();
 		return false;
 	});
