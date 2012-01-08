@@ -1,7 +1,7 @@
 $(function(){
 
 	// set URL using dynamic doc location and trigger a click
-	window.location = document.getElementById("aAddCss").href = "javascript:(function(){if(window.addCss!==undefined){window.addCss();}else{document.body.appendChild(document.createElement('script')).src='" + document.location.protocol + "//" + document.location.host + document.location.pathname + "addcss.js';}})();";
+	var sBookmarklet = window.location = document.getElementById("aAddCss").href = "javascript:(function(){if(window.addCss!==undefined){window.addCss();}else{document.body.appendChild(document.createElement('script')).src='" + document.location.protocol + "//" + document.location.host + document.location.pathname + "addcss.js';}})();";
 
 	// wait for it to load, then set some default CSS
 	var timerWait = setInterval(function(){
@@ -13,5 +13,13 @@ $(function(){
 			clearInterval(timerWait);
 		}
 	}, 5);
+
+	// fill textarea and setup ipad support toggler
+	$("#txtCopy").html(sBookmarklet);
+	var $dIpad = $("#dIpad")
+	$("#aIpad").click(function(){
+		$dIpad.toggle();
+		return false;
+	});
 
 });
