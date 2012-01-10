@@ -11,16 +11,16 @@
 		script.onload = script.onreadystatechange = function(){
 			if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")) {
 				done = true;
-				initAddCss();
+				initAddCss(jQuery);
 			}
 		};
 		document.getElementsByTagName("head")[0].appendChild(script);
 	} else {
-		initAddCss();
+		initAddCss(jQuery);
 	}
 
 	function initAddCss() {
-		(window.AddCss = function() {
+		(window.AddCss = function($) {
 
 			if (document.getElementById("txtAddCss")) {
 				$("#txtAddCss").toggle();
@@ -49,7 +49,8 @@
 				display: "block",
 				background: "#111",
 				color: "#fff",
-				border: "none",
+				border: "1px solid #000",
+				outline: "none",
 				width: "400px",
 				height: "200px",
 				font: "13px/18px \"Courier New\", Courier, \"Lucida Sans Typewriter\", \"Lucida Typewriter\", monospace",
@@ -71,7 +72,7 @@
 				}
 			}
 
-		})();
+		})(jQuery);
 	}
 
 })();
