@@ -1,8 +1,8 @@
 //	http://coding.smashingmagazine.com/2010/05/23/make-your-own-bookmarklets-with-jquery/
 
-//	needs:		throttling
-//	could use:	cleanup, browser testing for resizing and tabs
-//	breaks on: http://html5doctor.com/native-drag-and-drop/
+//	could use:  code cleanup, browser testing
+//	breaks on:  http://html5doctor.com/native-drag-and-drop/
+//	bugs:       tabs in opera
 
 (function(){
 
@@ -27,7 +27,7 @@
 	
 		window.addCss = function() {
 
-			var $ = window.jQuery;
+			var $ = window.jQuery, throttle;
 
 			if (document.getElementById("txtAddCss")) {
 				$("#txtAddCss").toggle();
@@ -64,9 +64,12 @@
 				overflow: "auto",
 				resize: "none"
 			}).bind("keyup change", function(){
-				var sCss = $txt.val();
-				$style.html(sCss);
-				if (bHasLocal) { localStorage.addCss = sCss; }
+				throttle = throttle || setTimeout(function(){
+					var sCss = $txt.val();
+					$style.html(sCss);
+					if (bHasLocal) { localStorage.addCss = sCss; }
+					throttle = undefined;
+				}, 500);
 			}).bind("keydown", function(e){
 				if (e.which === 27) {
 					$txt.toggle();

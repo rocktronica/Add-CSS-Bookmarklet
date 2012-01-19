@@ -1,9 +1,18 @@
 $(function(){
 
-	// set URL using dynamic doc location and trigger a click
-	var sBookmarklet = window.location = document.getElementById("aAddCss").href = "javascript:(function(){if(window.addCss!==undefined){window.addCss();}else{document.body.appendChild(document.createElement('script')).src='" + document.location.protocol + "//" + document.location.host + document.location.pathname + "addcss.min.js';}})();";
+	var sUrl = "javascript:(function(){if(window.addCss!==undefined){window.addCss();}else{document.body.appendChild(document.createElement('script')).src='" + document.location.protocol + "//" + document.location.host + document.location.pathname + "addcss";
 
-	// wait for it to load, then set some default CSS
+	// fudge up button text and use unminified source for local dev
+	if (!!window.location.port) {
+		document.getElementById("aAddCss").innerHTML += "*";
+	} else { sUrl += ".min"; }
+
+	sUrl += ".js';}})();";
+
+	// set URL using dynamic doc location and trigger a click
+	var sBookmarklet = window.location = document.getElementById("aAddCss").href = sUrl;
+
+	// wait for bookmarklet to load, then set some default CSS
 	var timerWait = setInterval(function(){
 		if (document.getElementById("txtAddCss")) {
 			var $txt = $("#txtAddCss");
@@ -23,7 +32,4 @@ $(function(){
 		return false;
 	});
 	
-	// fudge up button text for local dev
-	if (!!window.location.port) { document.getElementById("aAddCss").innerHTML += "*"; }
-
 });
