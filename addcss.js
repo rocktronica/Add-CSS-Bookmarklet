@@ -48,28 +48,33 @@
 				"z-index": "1000"
 			}).appendTo($("body"));
 
-			var $style = $("<style />").appendTo($("body"));
+			var $style = $("<style id='styleAddCss'>/**/</style>").appendTo($("body")),
+				bDynamicStyle = true,
+				iThrottle = 500;
 
-			var $txt = $("<textarea id='txtAddCss' spellcheck='false' />").css({
-				resize: "both",
-				display: "block",
-				background: "rgba(0,0,0,.9)",
-				color: "#fff",
-				border: "1px solid #000",
-				outline: "none",
-				width: "400px",
-				height: "200px",
-				font: "13px/18px \"Courier New\", Courier, \"Lucida Sans Typewriter\", \"Lucida Typewriter\", monospace",
-				padding: "10px",
-				overflow: "auto",
-				resize: "none"
-			}).bind("keyup change", function(){
+			var $txt = $("<textarea id='txtAddCss' spellcheck='false' style=\"resize:both; display:block; background-color:#111; background:rgba(0,0,0,.9); color:#fff; border:1px solid #000; outline:none; width:400px; height:200px; font:13px/18px 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace; padding:10px; overflow:auto; resize:none;\" />").css({
+			});
+
+			// determine if browser can handle dynamic style elements (cough, cough, IE8)
+			if (document.getElementById("styleAddCss").innerHTML !== "/**/") {
+				bDynamicStyle = false;
+				// safe to assume we also shouldn't update as often
+				iThrottle = 1000;
+			}
+
+			// bind event handlers
+			$txt.bind("keyup change", function(){
 				throttle = throttle || setTimeout(function(){
 					var sCss = $txt.val();
-					$style.html(sCss);
+					if (bDynamicStyle) {
+						$style.html(sCss);
+					} else {
+						$style.replaceWith("<style id='styleAddCss'>" + sCss + "</style>");
+						$style = $(document.getElementById("styleAddCss"));
+					}
 					if (bHasLocal) { localStorage.addCss = sCss; }
 					throttle = undefined;
-				}, 500);
+				}, iThrottle);
 			}).bind("keydown", function(e){
 				if (e.which === 27) {
 					$txt.toggle();
@@ -139,9 +144,9 @@
 				cursor: "nw-resize"
 			}).appendTo($container).on("mousedown", fn.startDrag);
 
-		};				// window.addCss
+		}; // window.addCss
 		window.addCss();
 
-	}					// initAddCss
+	} // initAddCss
 
-})();					// iife
+})(); // iife

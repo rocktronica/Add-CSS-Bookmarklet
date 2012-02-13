@@ -27,9 +27,9 @@ a { color: #111; }
 p, small { margin: 0 0 22px; }
 
 h1 { margin-left: -4px; }
-small { margin: 5px 0 20px 2px; }
+header small { margin: 5px 0 20px 2px; }
 
-small, footer {
+header small, footer {
 	display: block;
 	font-size: 13px;
 	color: #666;
@@ -75,14 +75,13 @@ small, footer {
 	box-shadow: inset 0 1px 1px #999, inset 0 2px 5px -2px #fff, inset 0 5px 30px -15px #666;
 }
 
-#txtCopy {
+.textinput {
 	display: block;
 	border: 0;
 	margin: 5px 0;
 	padding: 5px;
 	font-size: 14px;
 	width: 100%;
-	height: 60px;
 	background: #ddd;
 	overflow: hidden;
 	-moz-box-shadow: inset 0 2px 2px #ccc;
@@ -91,7 +90,11 @@ small, footer {
 	font-family: 'Open Sans', Sans-Serif;
 }
 
-#txtCopy:focus {
+textarea.textinput {
+	height: 60px;
+}
+
+.textinput:focus {
 	background: #e3e3e3;
 	-moz-box-shadow: none;
 	-webkit-box-shadow: none;
