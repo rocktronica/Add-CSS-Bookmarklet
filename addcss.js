@@ -2,7 +2,7 @@
 
 //	could use:  code cleanup, browser testing
 //	breaks on:  http://html5doctor.com/native-drag-and-drop/
-//	bugs:       tabs in opera
+//	bugs:       rgba fallback (may need css injected as tag rather than inlined?), tabs in opera
 
 (function(){
 
@@ -103,6 +103,7 @@
 					};
 					$(document).on("mousemove", fn.onMouseMove);
 					$(document).on("mouseup", fn.endDrag);
+					$(document).on("keypress", fn.endDrag);
 					return false;
 				},
 				onMouseMove: function(e) {
@@ -128,6 +129,7 @@
 					};
 					$(document).off("mousemove", fn.onMouseMove);
 					$(document).off("mouseup", fn.endDrag);
+					$(document).off("keypress", fn.endDrag);
 					return false;
 				}
 			};
