@@ -1,8 +1,7 @@
 //	http://coding.smashingmagazine.com/2010/05/23/make-your-own-bookmarklets-with-jquery/
 
 //	could use:  code cleanup, browser testing
-//	breaks on:  http://html5doctor.com/native-drag-and-drop/
-//	bugs:       rgba fallback (may need css injected as tag rather than inlined?), tabs in opera
+//	bugs:       tabs in opera
 
 (function(){
 
@@ -27,16 +26,12 @@
 	
 		window.addCss = function() {
 
-			var $ = window.jQuery, throttle;
+			var $ = window.jQuery, throttle = {}, $window = $(window);
 
 			if (document.getElementById("txtAddCss")) {
 				$("#txtAddCss").toggle();
 				return false;
 			}
-
-			// http://stackoverflow.com/questions/263743/how-to-get-cursor-position-in-textarea
-			function getCaret(a){if(a.selectionStart){return a.selectionStart}else if(document.selection){a.focus();var b=document.selection.createRange();if(b==null){return 0}var c=a.createTextRange(),d=c.duplicate();c.moveToBookmark(b.getBookmark());d.setEndPoint("EndToStart",c);return d.text.length}return 0};
-			function setCaret(a,b){if(a.setSelectionRange){a.setSelectionRange(b,b)}else if(input.createTextRange){var c=a.createTextRange();c.collapse(true);c.moveEnd("character",b);c.moveStart("character",b);c.select()}}
 
 			// taken from Modernizr, I think.
 			var bHasLocal = (function(){try{return"localStorage"in window&&window["localStorage"]!==null}catch(a){return false}})();
@@ -52,8 +47,12 @@
 				bDynamicStyle = true,
 				iThrottle = 500;
 
-			var $txt = $("<textarea id='txtAddCss' spellcheck='false' style=\"resize:both; display:block; background-color:#111; background:rgba(0,0,0,.9); color:#fff; border:1px solid #000; outline:none; width:400px; height:200px; font:13px/18px 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace; padding:10px; overflow:auto; resize:none;\" />").css({
-			});
+			var $txtStyle = $("<style type='text/css'> \
+				#txtAddCss{ resize:both; display:block; background-color:#111; backgrond: #000; background:rgba(0,0,0,.9); color:#fff; border:1px solid #000; outline:none; width:400px; height:200px; font:13px/18px 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace; padding: 10px; overflow: auto; resize: none; } \
+				#spAddCssHandle { border-width: 8px; border-style: solid; border-color: rgb(255, 255, 255) transparent transparent rgb(255, 255, 255); position: absolute; top: 0px; left: 0px; opacity: 0.1; cursor: nw-resize; } \
+			</style>").appendTo($container);
+			var $txt = $("<textarea id='txtAddCss' spellcheck='false' />").appendTo($container).focus();
+			var $handle = $("<span id='spAddCssHandle' />").appendTo($container);
 
 			// determine if browser can handle dynamic style elements (cough, cough, IE8)
 			if (document.getElementById("styleAddCss").innerHTML !== "/**/") {
@@ -62,89 +61,114 @@
 				iThrottle = 1000;
 			}
 
-			// bind event handlers
-			$txt.bind("keyup change", function(){
-				throttle = throttle || setTimeout(function(){
-					var sCss = $txt.val();
-					if (bDynamicStyle) {
-						$style.html(sCss);
-					} else {
-						$style.replaceWith("<style id='styleAddCss'>" + sCss + "</style>");
-						$style = $(document.getElementById("styleAddCss"));
-					}
-					if (bHasLocal) { localStorage.addCss = sCss; }
-					throttle = undefined;
-				}, iThrottle);
-			}).bind("keydown", function(e){
-				if (e.which === 27) {
-					$txt.toggle();
-				} else if (e.which === 9) {
-					var sVal = $txt.val(),
-						iCaret = getCaret($txt[0]);
-					$txt.val(sVal.substr(0, iCaret) + "\t" + sVal.substr(iCaret));
-					iCaret++;
-					setCaret($txt[0], iCaret);
-					return false;
-				};
-			}).appendTo($container).focus();
+			// key events
+			(function(){
+
+				// http://stackoverflow.com/questions/263743/how-to-get-cursor-position-in-textarea
+				function getCaret(a){if(a.selectionStart){return a.selectionStart}else if(document.selection){a.focus();var b=document.selection.createRange();if(b==null){return 0}var c=a.createTextRange(),d=c.duplicate();c.moveToBookmark(b.getBookmark());d.setEndPoint("EndToStart",c);return d.text.length}return 0};
+				function setCaret(a,b){if(a.setSelectionRange){a.setSelectionRange(b,b)}else if(input.createTextRange){var c=a.createTextRange();c.collapse(true);c.moveEnd("character",b);c.moveStart("character",b);c.select()}}
+	
+				$txt.bind("keyup change", function(){
+					throttle.keyup = throttle.keyup || setTimeout(function(){
+						var sCss = $txt.val();
+						if (bDynamicStyle) {
+							$style.html(sCss);
+						} else { // better way to do this?
+							$style.replaceWith("<style id='styleAddCss'>" + sCss + "</style>");
+							$style = $(document.getElementById("styleAddCss"));
+						}
+						if (bHasLocal) { localStorage.addCss = sCss; }
+						throttle.keyup = undefined;
+					}, iThrottle);
+				}).bind("keydown", function(e){
+					if (e.which === 27) {
+						$txt.toggle();
+					} else if (e.which === 9) {
+						var sVal = $txt.val(),
+							iCaret = getCaret($txt[0]);
+						$txt.val(sVal.substr(0, iCaret) + "\t" + sVal.substr(iCaret));
+						iCaret++;
+						setCaret($txt[0], iCaret);
+						return false;
+					};
+				});
+			
+			}());
 			
 			if (bHasLocal) {
 				if (localStorage.addCss) { $txt.val(localStorage.addCss).change(); }
 				if (localStorage.addCssCss) { $txt.css($.parseJSON(localStorage.addCssCss)); }
 			}
 
-			// vars and event handlers for resizing
-			var pos = { start: {}, diff: {} }, css = { start: { width: $txt.width(), height: $txt.height() }, end: { width: undefined, height: undefined } };
-			var fn = {
-				startDrag: function(e) {
-					pos.start = {
-						x: e.clientX || e.pageX,
-						y: e.clientY || e.pageY
-					};
-					$(document).on("mousemove", fn.onMouseMove);
-					$(document).on("mouseup", fn.endDrag);
-					$(document).on("keypress", fn.endDrag);
-					return false;
-				},
-				onMouseMove: function(e) {
-					pos.diff.x = pos.start.x - (e.clientX || e.pageX);
-					pos.diff.y = pos.start.y - (e.clientY || e.pageY);
-					css.end.width = css.start.width + pos.diff.x;
-					css.end.height = css.start.height + pos.diff.y;
-					$txt.css(css.end);
-				},
-				endDrag: function(e) {
-					if (bHasLocal) { localStorage.addCssCss = JSON.stringify(css.end); }
-					pos.diff = {
-						x: 0,
-						y: 0
-					}, css = {
-						start: {
-							width: $txt.width(),
-							height: $txt.height()
-						}, end: {
-							width: undefined,
-							height: undefined
-						}
-					};
-					$(document).off("mousemove", fn.onMouseMove);
-					$(document).off("mouseup", fn.endDrag);
-					$(document).off("keypress", fn.endDrag);
-					return false;
-				}
-			};
+			// resizing
+			(function(){
 
-			// resize handle
-			var $handle = $("<span id='spAddCssHandle' />").css({
-				border: "8px solid #fff",
-				position: "absolute",
-				top: 0,
-				left: 0,
-				"border-right-color": "transparent",
-				"border-bottom-color": "transparent",
-				opacity: ".1",
-				cursor: "nw-resize"
-			}).appendTo($container).on("mousedown", fn.startDrag);
+				var pos = { start: {}, diff: {} }, css = { start: { width: $txt.width(), height: $txt.height() }, end: { width: undefined, height: undefined } };
+
+				function fixToScreen(){
+					var iOffset = 40;
+					var window = { width: $window.width(), height: $window.height() };
+					var text = { width: $txt.width(), height: $txt.height() };
+					if (window.width < text.width + iOffset) {
+						var iNewWidth = window.width - iOffset;
+						$txt.css("width", iNewWidth);
+						css.start.width = iNewWidth;
+					}
+					if (window.height < text.height + iOffset) {
+						var iNewHeight = window.height - iOffset;
+						$txt.css("height", iNewHeight);
+						css.start.height = iNewHeight;
+					}
+					throttle.windowResize = undefined;
+				}
+	
+				var fn = {
+					startDrag: function(e) {
+						pos.start = {
+							x: e.clientX || e.pageX,
+							y: e.clientY || e.pageY
+						};
+						$(document).on("mousemove", fn.onMouseMove);
+						$(document).on("mouseup", fn.endDrag);
+						$(document).on("keypress", fn.endDrag);
+						return false;
+					},
+					onMouseMove: function(e) {
+						pos.diff.x = pos.start.x - (e.clientX || e.pageX);
+						pos.diff.y = pos.start.y - (e.clientY || e.pageY);
+						css.end.width = css.start.width + pos.diff.x;
+						css.end.height = css.start.height + pos.diff.y;
+						$txt.css(css.end);
+					},
+					endDrag: function(e) {
+						if (bHasLocal) { localStorage.addCssCss = JSON.stringify(css.end); }
+						pos.diff = {
+							x: 0,
+							y: 0
+						}, css = {
+							start: {
+								width: $txt.width(),
+								height: $txt.height()
+							}, end: {
+								width: undefined,
+								height: undefined
+							}
+						};
+						$(document).off("mousemove", fn.onMouseMove);
+						$(document).off("mouseup", fn.endDrag);
+						$(document).off("keypress", fn.endDrag);
+						fixToScreen();
+						return false;
+					}
+				};
+				
+				$handle.on("mousedown", fn.startDrag);
+
+				$window.on("resize", function(){
+					throttle.windowResize = throttle.windowResize || setTimeout(fixToScreen, 10);
+				}).resize();
+
+			}());
 
 		}; // window.addCss
 		window.addCss();
