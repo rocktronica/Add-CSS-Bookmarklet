@@ -3,7 +3,7 @@ $(function(){
 	var sUrl = "javascript:(function(){if(window.addCss!==undefined){window.addCss();}else{document.body.appendChild(document.createElement('script')).src='" + document.location.protocol + "//" + document.location.host + document.location.pathname + "addcss";
 
 	// fudge up button text and use unminified source for local dev
-	if (!!window.location.port) {
+	if (!!location.port || !!location.search.match("source")) {
 		document.getElementById("aAddCss").innerHTML += "*";
 	} else { sUrl += ".min"; }
 
