@@ -26,43 +26,101 @@
 	
 		window.addCss = function() {
 
-			var $ = window.jQuery, throttle = {}, $window = $(window);
+			var $ = $ || window.jQuery,
+				$window = $(window),
+				$document = $(document),
+				throttle = {};
 
 			if (document.getElementById("txtAddCss")) {
 				$("#txtAddCss").toggle();
 				return false;
 			}
 
-			// taken from Modernizr, I think.
-			var bHasLocal = (function(){try{return"localStorage"in window&&window["localStorage"]!==null}catch(a){return false}})();
+			var iThrottle = 500;
 
-			var $container = $("<div />").css({
-				position: "fixed",
-				bottom: "10px",
-				right: "10px",
-				"z-index": "1000"
+			var supports = {
+				localStorage: (function(){
+					try {
+						return "localStorage" in window && window["localStorage"] !== null;
+					} catch (a) {
+						return false;
+					}
+				}()),
+				dynamicStyle: true
+			};
+
+			var $container = $("<div />", {
+				id: "containerAddCss"
 			}).appendTo($("body"));
 
-			var $style = $("<style id='styleAddCss'>/**/</style>").appendTo($("body")),
-				bDynamicStyle = true,
-				iThrottle = 500;
+			// load LESS if browser doesn't already have it
+			// (not bothering here w/ versioning. ping me if it matters for you)
+			var parser = {
+				parse: function (s) {
+					updateCss(s);
+				},
+				replace: function() {
+					parser = new less.Parser();
+				}
+			};
+			if (window.less && window.less.Parser) {
+				parser.replace();
+			} else {
+				$.getScript("http://cdnjs.cloudflare.com/ajax/libs/less.js/1.3.0/less-1.3.0.min.js", parser.replace);
+			}
 
-			var $txtStyle = $("<style type='text/css'> \
-				#txtAddCss{ resize:both; display:block; background-color:#111; backgrond: #000; background:rgba(0,0,0,.9); color:#fff; border:1px solid #000; outline:none; width:400px; height:200px; font:13px/18px 'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace; padding: 10px; overflow: auto; resize: none; } \
-				#spAddCssHandle { border-width: 8px; border-style: solid; border-color: rgb(255, 255, 255) transparent transparent rgb(255, 255, 255); position: absolute; top: 0px; left: 0px; opacity: 0.1; cursor: nw-resize; } \
-			</style>").appendTo($container);
-			var $txt = $("<textarea id='txtAddCss' spellcheck='false' />").appendTo($container).focus();
-			var $handle = $("<span id='spAddCssHandle' />").appendTo($container);
+			var $style = $("<style />", {
+				id: "styleAddCss"
+			}).html("/**/").appendTo($("body"));
+
+			$("<link />", {
+				rel: "stylesheet",
+				type: "text/css",
+				href: location.hostname.match("localhost") ? "/addcss.css" : "http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.css"
+			}).appendTo($container);
+
+			var $txt = $("<textarea />", {
+				id: "txtAddCss",
+				spellcheck: false
+			}).appendTo($container).focus();
+
+			var $handle = $("<span />", {
+				id: "spAddCssHandle"
+			}).appendTo($container);
 
 			// determine if browser can handle dynamic style elements (cough, cough, IE8)
 			if (document.getElementById("styleAddCss").innerHTML !== "/**/") {
-				bDynamicStyle = false;
+				supports.dynamicStyle = false;
 				// safe to assume we also shouldn't update as often
 				iThrottle = 1000;
 			}
 
+			var updateLess = function(sContext) {
+				parser.parse(sContext, function (err, tree) {
+				    if (err) { return false; }
+				    updateCss(tree.toCSS());
+					if (supports.localStorage) {
+						localStorage.addCss = sContext;
+					}
+				});
+			};
+
+			var updateCss = function(sCss) {
+				if (supports.dynamicStyle) {
+					$style.html(sCss);
+				} else { // better way to do this?
+					$style.replaceWith("<style id='styleAddCss'>" + sCss + "</style>");
+					$style = $(document.getElementById("styleAddCss"));
+				}
+			};
+
 			// key events
 			(function(){
+
+				var KEYS = {
+					ESC: 27,
+					TAB: 9
+				};
 
 				// http://stackoverflow.com/questions/263743/how-to-get-cursor-position-in-textarea
 				function getCaret(a){if(a.selectionStart){return a.selectionStart}else if(document.selection){a.focus();var b=document.selection.createRange();if(b==null){return 0}var c=a.createTextRange(),d=c.duplicate();c.moveToBookmark(b.getBookmark());d.setEndPoint("EndToStart",c);return d.text.length}return 0};
@@ -71,19 +129,14 @@
 				$txt.bind("keyup change", function(){
 					throttle.keyup = throttle.keyup || setTimeout(function(){
 						var sCss = $txt.val();
-						if (bDynamicStyle) {
-							$style.html(sCss);
-						} else { // better way to do this?
-							$style.replaceWith("<style id='styleAddCss'>" + sCss + "</style>");
-							$style = $(document.getElementById("styleAddCss"));
-						}
-						if (bHasLocal) { localStorage.addCss = sCss; }
+						updateLess(sCss);
 						throttle.keyup = undefined;
 					}, iThrottle);
 				}).bind("keydown", function(e){
-					if (e.which === 27) {
+					var key = e.which;
+					if (key === KEYS.ESC) {
 						$txt.toggle();
-					} else if (e.which === 9) {
+					} else if (key === KEYS.TAB) {
 						var sVal = $txt.val(),
 							iCaret = getCaret($txt[0]);
 						$txt.val(sVal.substr(0, iCaret) + "\t" + sVal.substr(iCaret));
@@ -95,15 +148,23 @@
 			
 			}());
 			
-			if (bHasLocal) {
-				if (localStorage.addCss) { $txt.val(localStorage.addCss).change(); }
-				if (localStorage.addCssCss) { $txt.css($.parseJSON(localStorage.addCssCss)); }
+			if (supports.localStorage) {
+				if (localStorage.addCss) {
+					$txt.val(localStorage.addCss).change();
+				}
+				if (localStorage.addCssCss) {
+					$txt.css($.parseJSON(localStorage.addCssCss));
+				}
 			}
 
 			// resizing
 			(function(){
 
-				var pos = { start: {}, diff: {} }, css = { start: { width: $txt.width(), height: $txt.height() }, end: { width: undefined, height: undefined } };
+				var pos = { start: {}, diff: {} },
+					css = {
+						start: { width: $txt.width(), height: $txt.height() }, 
+						end: { width: undefined, height: undefined }
+					};
 
 				function fixToScreen(){
 					var iOffset = 40;
@@ -128,9 +189,9 @@
 							x: e.clientX || e.pageX,
 							y: e.clientY || e.pageY
 						};
-						$(document).on("mousemove", fn.onMouseMove);
-						$(document).on("mouseup", fn.endDrag);
-						$(document).on("keypress", fn.endDrag);
+						$document.on("mousemove", fn.onMouseMove)
+							.on("mouseup", fn.endDrag)
+							.on("keypress", fn.endDrag);
 						return false;
 					},
 					onMouseMove: function(e) {
@@ -141,7 +202,7 @@
 						$txt.css(css.end);
 					},
 					endDrag: function(e) {
-						if (bHasLocal) { localStorage.addCssCss = JSON.stringify(css.end); }
+						if (supports.localStorage) { localStorage.addCssCss = JSON.stringify(css.end); }
 						pos.diff = {
 							x: 0,
 							y: 0
@@ -154,9 +215,9 @@
 								height: undefined
 							}
 						};
-						$(document).off("mousemove", fn.onMouseMove);
-						$(document).off("mouseup", fn.endDrag);
-						$(document).off("keypress", fn.endDrag);
+						$document.off("mousemove", fn.onMouseMove)
+							.off("mouseup", fn.endDrag)
+							.off("keypress", fn.endDrag);
 						fixToScreen();
 						return false;
 					}
