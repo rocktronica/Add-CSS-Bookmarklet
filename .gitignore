@@ -1,3 +1,5 @@
 Project.espressostorage
 user.tommy.espressostorage
 addcss.esproj
+.DS_Store
+node_modules/*

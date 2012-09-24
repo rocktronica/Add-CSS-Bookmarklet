@@ -5,7 +5,7 @@
 	z-index: 1000;
 }
 
-#containerAddCss #txtAddCss {
+#txtAddCss {
 	resize: both;
 	display: block;
 	background-color: #111;
@@ -22,7 +22,7 @@
 	resize: none
 }
 
-#containerAddCss #spAddCssHandle {
+#spAddCssHandle {
 	border-width: 8px;
 	border-style: solid;
 	border-color: #fff transparent transparent #fff;

@@ -1,26 +1,9 @@
-//	http://coding.smashingmagazine.com/2010/05/23/make-your-own-bookmarklets-with-jquery/
-
 //	could use:  code cleanup, browser testing
 //	bugs:       tabs in opera
 
 (function(){
 
-	var v = "1.7";
-
-	if (window.jQuery === undefined || window.jQuery.fn.jquery < v) {
-		var done = false;
-		var script = document.createElement("script");
-		script.src = "http://ajax.googleapis.com/ajax/libs/jquery/" + v + "/jquery.min.js";
-		script.onload = script.onreadystatechange = function(){
-			if (!done && (!this.readyState || this.readyState == "loaded" || this.readyState == "complete")) {
-				done = true;
-				initAddCss(jQuery);
-			}
-		};
-		document.getElementsByTagName("head")[0].appendChild(script);
-	} else {
-		initAddCss(jQuery);
-	}
+	"use strict";
 
 	function initAddCss($) {
 	
@@ -76,7 +59,7 @@
 			$("<link />", {
 				rel: "stylesheet",
 				type: "text/css",
-				href: location.hostname.match("localhost") ? "/addcss.css" : "http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.css"
+				href: location.hostname.match("localhost") ? "/addcss.css" : "http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.min.css"
 			}).appendTo($container);
 
 			var $txt = $("<textarea />", {
@@ -96,13 +79,17 @@
 			}
 
 			var updateLess = function(sContext) {
-				parser.parse(sContext, function (err, tree) {
-				    if (err) { return false; }
-				    updateCss(tree.toCSS());
-					if (supports.localStorage) {
-						localStorage.addCss = sContext;
-					}
-				});
+				// overkill?
+				try {
+					parser.parse(sContext, function (err, tree) {
+						if (err) { return false; }
+						updateCss(tree.toCSS());
+						if (supports.localStorage) {
+							localStorage.addCss = sContext;
+						}
+					});
+				} catch(err) {
+				}
 			};
 
 			var updateCss = function(sCss) {
@@ -123,8 +110,8 @@
 				};
 
 				// http://stackoverflow.com/questions/263743/how-to-get-cursor-position-in-textarea
-				function getCaret(a){if(a.selectionStart){return a.selectionStart}else if(document.selection){a.focus();var b=document.selection.createRange();if(b==null){return 0}var c=a.createTextRange(),d=c.duplicate();c.moveToBookmark(b.getBookmark());d.setEndPoint("EndToStart",c);return d.text.length}return 0};
-				function setCaret(a,b){if(a.setSelectionRange){a.setSelectionRange(b,b)}else if(input.createTextRange){var c=a.createTextRange();c.collapse(true);c.moveEnd("character",b);c.moveStart("character",b);c.select()}}
+				function getCaret(a){if(a.selectionStart){return a.selectionStart;}else if(document.selection){a.focus();var b=document.selection.createRange();if(b==null){return 0;}var c=a.createTextRange(),d=c.duplicate();c.moveToBookmark(b.getBookmark());d.setEndPoint("EndToStart",c);return d.text.length;}return 0;}
+				function setCaret(a,b){if(a.setSelectionRange){a.setSelectionRange(b,b);}else if(a.createTextRange){var c=a.createTextRange();c.collapse(true);c.moveEnd("character",b);c.moveStart("character",b);c.select();}}
 	
 				$txt.bind("keyup change", function(){
 					throttle.keyup = throttle.keyup || setTimeout(function(){
@@ -143,7 +130,7 @@
 						iCaret++;
 						setCaret($txt[0], iCaret);
 						return false;
-					};
+					}
 				});
 			
 			}());
@@ -206,7 +193,8 @@
 						pos.diff = {
 							x: 0,
 							y: 0
-						}, css = {
+						};
+						css = {
 							start: {
 								width: $txt.width(),
 								height: $txt.height()
@@ -236,4 +224,20 @@
 
 	} // initAddCss
 
-})(); // iife
+	var v = "1.7";
+	if (window.jQuery === undefined || window.jQuery.fn.jquery < v) {
+		var done = false;
+		var script = document.createElement("script");
+		script.src = "http://ajax.googleapis.com/ajax/libs/jquery/" + v + "/jquery.min.js";
+		script.onload = script.onreadystatechange = function(){
+			if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
+				done = true;
+				initAddCss(jQuery);
+			}
+		};
+		document.getElementsByTagName("head")[0].appendChild(script);
+	} else {
+		initAddCss(jQuery);
+	}
+
+}()); // iife
