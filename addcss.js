@@ -59,7 +59,9 @@
 			$("<link />", {
 				rel: "stylesheet",
 				type: "text/css",
-				href: location.hostname.match("localhost") ? "/addcss.css" : "http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.min.css"
+				href: (location.hostname.match("localhost") &&
+					document.title.match("Add CSS Bookmarklet")) ? "/addcss.css" :
+					"http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.min.css"
 			}).appendTo($container);
 
 			var $txt = $("<textarea />", {
