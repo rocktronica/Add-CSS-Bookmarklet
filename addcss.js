@@ -1,5 +1,5 @@
 //	could use:  code cleanup, browser testing
-//	bugs:       tabs in opera
+//	bugs:       tabs in opera, wonky txt resize after window resize
 
 (function(){
 
@@ -56,18 +56,20 @@
 				id: "styleAddCss"
 			}).html("/**/").appendTo($("body"));
 
+			var $txt = $("<textarea />", {
+				id: "txtAddCss",
+				spellcheck: false
+			}).appendTo($container);
+
 			$("<link />", {
 				rel: "stylesheet",
 				type: "text/css",
 				href: (location.hostname.match("localhost") &&
 					document.title.match("Add CSS Bookmarklet")) ? "/addcss.css" :
 					"http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.min.css"
-			}).appendTo($container);
-
-			var $txt = $("<textarea />", {
-				id: "txtAddCss",
-				spellcheck: false
-			}).appendTo($container).focus();
+			}).appendTo($container).on("load", function() {
+				$txt.focus();
+			});
 
 			var $handle = $("<span />", {
 				id: "spAddCssHandle"
