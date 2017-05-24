@@ -49,7 +49,7 @@
 			if (window.less && window.less.Parser) {
 				parser.replace();
 			} else {
-				$.getScript("http://cdnjs.cloudflare.com/ajax/libs/less.js/1.3.0/less-1.3.0.min.js", parser.replace);
+				$.getScript("https://cdnjs.cloudflare.com/ajax/libs/less.js/1.3.0/less-1.3.0.min.js", parser.replace);
 			}
 
 			var $style = $("<style />", {
@@ -66,7 +66,7 @@
 				type: "text/css",
 				href: (location.hostname.match("localhost") &&
 					document.title.match("Add CSS Bookmarklet")) ? "/addcss.css" :
-					"http://rocktronica.github.com/Add-CSS-Bookmarklet/addcss.min.css"
+					"https://rocktronica.github.io/Add-CSS-Bookmarklet/addcss.min.css"
 			}).appendTo($container).on("load", function() {
 				$txt.focus();
 			});
@@ -113,7 +113,7 @@
 					TAB: 9
 				};
 
-				// http://stackoverflow.com/questions/263743/how-to-get-cursor-position-in-textarea
+				// https://stackoverflow.com/questions/263743/caret-position-in-textarea-in-characters-from-the-start
 				function getCaret(a){if(a.selectionStart){return a.selectionStart;}else if(document.selection){a.focus();var b=document.selection.createRange();if(b==null){return 0;}var c=a.createTextRange(),d=c.duplicate();c.moveToBookmark(b.getBookmark());d.setEndPoint("EndToStart",c);return d.text.length;}return 0;}
 				function setCaret(a,b){if(a.setSelectionRange){a.setSelectionRange(b,b);}else if(a.createTextRange){var c=a.createTextRange();c.collapse(true);c.moveEnd("character",b);c.moveStart("character",b);c.select();}}
 	
@@ -232,7 +232,7 @@
 	if (window.jQuery === undefined || window.jQuery.fn.jquery < v) {
 		var done = false;
 		var script = document.createElement("script");
-		script.src = "http://ajax.googleapis.com/ajax/libs/jquery/" + v + "/jquery.min.js";
+		script.src = "https://ajax.googleapis.com/ajax/libs/jquery/" + v + "/jquery.min.js";
 		script.onload = script.onreadystatechange = function(){
 			if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
 				done = true;
